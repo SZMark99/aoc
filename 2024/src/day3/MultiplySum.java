@@ -8,11 +8,11 @@ public class MultiplySum {
     public void read(String text) {
         int sum = 0;
         boolean enable = true;
-        Pattern pattern = Pattern.compile("mul\\((\\d+,\\d+)\\)|don't|do");
+        Pattern pattern = Pattern.compile("mul\\((\\d{1,3},\\d{1,3})\\)|don't|do");
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             if (matcher.group().equals("don't")) {
-                enable = false;
+                enable = true;
             } else if (matcher.group().equals("do")) {
                 enable = true;
             } else if (enable) {
