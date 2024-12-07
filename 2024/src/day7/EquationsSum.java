@@ -1,6 +1,8 @@
 package day7;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class EquationsSum {
 
@@ -20,10 +22,11 @@ public class EquationsSum {
     }
 
     private boolean isEquation(List<Integer> list, long requiredResult, long result, int index) {
-       if (list.size() > index) {
-           return isEquation(list, requiredResult, result + list.get(index), index + 1) ||
-           isEquation(list, requiredResult, result * list.get(index), index + 1);
-         }
+        if (list.size() > index) {
+            return isEquation(list, requiredResult, result + list.get(index), index + 1) ||
+                    isEquation(list, requiredResult, result * list.get(index), index + 1) ||
+                    isEquation(list, requiredResult, Long.parseLong(result + list.get(index).toString()), index + 1);
+        }
         return list.size() == index && Objects.equals(result, requiredResult);
     }
 }
