@@ -2,6 +2,7 @@ package day2;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 public class GiftShopCodeSum {
@@ -20,11 +21,8 @@ public class GiftShopCodeSum {
                 Long.parseLong(strings[1])
         );
         return stream.mapToObj(Long::toString)
-                .filter(number -> number.length() % 2 == 0)
                 .map(number -> {
-                    String firstHalf = number.substring(0, number.length() / 2);
-                    String secondHalf = number.substring(number.length() / 2);
-                    if (Objects.equals(firstHalf, secondHalf)) {
+                    if (isRepeated(number)) {
                         return number;
                     }
                     return null;
@@ -32,5 +30,23 @@ public class GiftShopCodeSum {
                 .filter(Objects::nonNull)
                 .mapToLong(Long::parseLong)
                 .sum();
+    }
+
+    private static boolean isRepeated(String number) {
+        IntStream stream = IntStream.rangeClosed(1, number.length()/2);
+        return stream
+                .filter(i-> number.length()%i==0)
+                .anyMatch(repeatLength-> {
+                    int repeateTime = number.length() / repeatLength;
+                    return IntStream.rangeClosed(1, repeateTime)
+                            .allMatch(sectionMultiplier-> allPartEquals(number, repeatLength, sectionMultiplier));
+                    
+                });
+    }
+
+    private static boolean allPartEquals(String number, int repeatLength, int sectionMultiplier) {
+        String part = number.substring(0, repeatLength);
+        String nextPart = number.substring((sectionMultiplier -1)* repeatLength, sectionMultiplier * repeatLength);
+        return part.equals(nextPart);
     }
 }
