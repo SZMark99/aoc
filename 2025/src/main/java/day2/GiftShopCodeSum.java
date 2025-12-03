@@ -2,24 +2,24 @@ package day2;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public class GiftShopCodeSum {
     public static void read(String text) {
-        int sum = Arrays.stream(text.replace("\n", "")
+        Long sum = Arrays.stream(text.replace("\n", "")
                         .split(","))
                 .map(s -> s.split("-"))
-                .mapToInt(GiftShopCodeSum::searchReflection)
+                .mapToLong(GiftShopCodeSum::searchReflection)
                 .sum();
         System.out.println(sum);
     }
 
-    private static int searchReflection(String[] strings) {
-        IntStream stream = IntStream.rangeClosed(
-                Integer.parseInt(strings[0]),
-                Integer.parseInt(strings[1])
+    private static long searchReflection(String[] strings) {
+        LongStream stream = LongStream.rangeClosed(
+                Long.parseLong(strings[0]),
+                Long.parseLong(strings[1])
         );
-        return stream.mapToObj(Integer::toString)
+        return stream.mapToObj(Long::toString)
                 .filter(number -> number.length() % 2 == 0)
                 .map(number -> {
                     String firstHalf = number.substring(0, number.length() / 2);
@@ -30,7 +30,7 @@ public class GiftShopCodeSum {
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .mapToInt(Integer::parseInt)
+                .mapToLong(Long::parseLong)
                 .sum();
     }
 }
