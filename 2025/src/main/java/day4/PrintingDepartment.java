@@ -5,9 +5,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class PrintingDepartment {
-    private static int x = 0;
     private static int y = 0;
     private final static List<Point> points = new ArrayList<>();
 
@@ -19,7 +19,6 @@ public class PrintingDepartment {
     }
 
     private static long getCount() {
-        y = 0;
         List<Point> removePoints = new ArrayList<>();
         long count = points.stream()
                 .filter(PrintingDepartment::isFewerThanFourNeighbors)
@@ -67,14 +66,9 @@ public class PrintingDepartment {
     }
 
     private static void addPoint(String line) {
-        x = 0;
-        Arrays.stream(line.split(""))
-                .forEach(c -> {
-                    if (c.equals("@")) {
-                        points.add(new Point(x, y));
-                    }
-                    x++;
-                });
+        IntStream.range(0, line.length())
+                .filter(i -> line.charAt(i) == '@')
+                .forEach(i -> points.add(new Point(i, y)));
         y++;
     }
 }
