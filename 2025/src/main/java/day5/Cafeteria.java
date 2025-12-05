@@ -1,30 +1,90 @@
 package day5;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Cafeteria {
     public static void read(String text) {
         String[] split = text.split("\n\n");
-        List<Long[]> ranges = Arrays.stream(split[0].split("\n"))
+        List<Range> ranges = Arrays.stream(split[0].split("\n"))
                 .map(line -> {
                     String[] parts = line.split("-");
-                    Long[] range = new Long[2];
                     long start = Long.parseLong(parts[0]);
                     long end = Long.parseLong(parts[1]);
-                    range[0] = start;
-                    range[1] = end;
-                    return range;
+                    return new Range(start, end);
                 })
                 .toList();
-        long total = Arrays.stream(split[1].split("\n"))
-                .map(Long::parseLong)
-                .filter(o -> isContainsRange(o, ranges))
-                .count();
+        List<Range> collectionRanges = new ArrayList<>();
+        ranges.stream()
+                .forEach(r -> {
+                    if (collectionRanges.isEmpty()) {
+                        collectionRanges.add(r);
+                        return;
+                    }
+                    Range startInNewRanges = getRange(r.start, collectionRanges);
+                    Range endInNewRanges = getRange(r.end, collectionRanges);
+                    if (isInNewRanges(startInNewRanges, endInNewRanges)) {
+                        return;
+                    }
+                    if (isMergeNeeded(startInNewRanges, endInNewRanges)) {
+                        Range mergedRange = new Range(
+                                Math.min(startInNewRanges.start, endInNewRanges.start),
+                                Math.max(startInNewRanges.end, endInNewRanges.end)
+                        );
+                        collectionRanges.remove(startInNewRanges);
+                        collectionRanges.remove(endInNewRanges);
+                        collectionRanges.add(mergedRange);
+                        return;
+                    }
+                    if (Objects.nonNull(startInNewRanges)) {
+                        startInNewRanges.end = Math.max(startInNewRanges.end, r.end);
+                        return;
+                    }
+                    if (Objects.nonNull(endInNewRanges)) {
+                        endInNewRanges.start = Math.min(endInNewRanges.start,  r.start);
+                        return;
+                    }
+                    collectionRanges.add(r);
+
+                });
+
+        long total = collectionRanges.stream()
+                .filter(range -> !isInOtherRange(range, collectionRanges))
+                .mapToLong(r -> r.end - r.start + 1)
+                .sum();
         System.out.println(total);
     }
 
-    private static boolean isContainsRange(Long o, List<Long[]> ranges) {
-        return ranges.stream().anyMatch(r -> o >= r[0] && o <= r[1]);
+    private static boolean isMergeNeeded(Range startInNewRanges, Range endInNewRanges) {
+        return Objects.nonNull(startInNewRanges) && Objects.nonNull(endInNewRanges) && startInNewRanges != endInNewRanges;
+    }
+
+    private static boolean isInNewRanges(Range startInNewRanges, Range endInNewRanges) {
+        return Objects.nonNull(startInNewRanges) && Objects.nonNull(endInNewRanges) && startInNewRanges == endInNewRanges;
+    }
+
+    private static Range getRange(Long start, List<Range> ranges) {
+        return ranges.stream()
+                .filter(r -> start >= r.start && start <= r.end)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static boolean isInOtherRange(Range range, List<Range> ranges) {
+        return ranges.stream()
+                .filter(obj -> !range.equals(obj))
+                .anyMatch(r -> range.start >= r.start && range.end <= r.end);
+    }
+
+    private static class Range {
+        Long start;
+        Long end;
+
+        public Range(Long start, Long end) {
+            this.start = start;
+            this.end = end;
+        }
     }
 }
