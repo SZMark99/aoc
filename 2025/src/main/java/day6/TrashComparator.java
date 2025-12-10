@@ -10,8 +10,13 @@ public class TrashComparator {
     static List<Column> columns = new ArrayList<>();
 
     public static void read(String text) {
-        Arrays.stream(text.split("\n"))
-                .forEach(TrashComparator::readColumns);
+        String[] rows = text.split("\n");
+        String lastRow = rows[rows.length - 1];
+        int[] colCounts = IntStream.rangeClosed(1, lastRow.length()-1)
+                .filter(s -> lastRow.charAt(s) != ' ')
+                .toArray();
+        Arrays.stream(rows)
+                .forEach(line -> readColumns(line, colCounts));
 
         long sum = columns.stream()
                 .mapToLong(TrashComparator::operationsCalculator)
@@ -21,6 +26,8 @@ public class TrashComparator {
 
     private static long operationsCalculator(Column column) {
         return column.values.stream()
+                .map(StringBuilder::toString)
+                .map(String::trim)
                 .mapToLong(Long::parseLong)
                 .reduce((a, b) -> {
                     if (column.operator.equals("*")) {
@@ -31,29 +38,39 @@ public class TrashComparator {
                 }).orElse(0L);
     }
 
-    private static void readColumns(String line) {
-        String[] numbers = line.trim().split("\\s+");
-        IntStream.rangeClosed(0, numbers.length - 1)
+    private static void readColumns(String line, int[] colCounts) {
+        int prevIndex = 0;
+        List<String> numbers = new ArrayList<>();
+        for (int colCount : colCounts) {
+            String number = line.substring(prevIndex, colCount-1);
+            numbers.add(number);
+            prevIndex = colCount;
+        }
+        IntStream.rangeClosed(0, numbers.size() - 1)
                 .forEach(x -> {
-                    String number = numbers[x];
+                    String number = numbers.get(x);
+
                     if (y == 0) {
-                        Column e = new Column(x);
-                        e.values.add(number);
-                        columns.add(e);
+                        Column col = new Column(x);
+                        IntStream.rangeClosed(0, number.length() - 1)
+                                .forEach(i -> col.values.add(new StringBuilder(number.charAt(i) + "")));
+                        columns.add(col);
                         return;
                     }
-                    if (number.equals("*") || number.equals("+")) {
-                        columns.get(x).setOperator(number);
+                    if (number.trim().equals("*") || number.trim().equals("+")) {
+                        columns.get(x).setOperator(number.trim());
                         return;
                     }
-                    columns.get(x).values.add(number);
+                    Column column = columns.get(x);
+                    IntStream.rangeClosed(0, number.length() - 1)
+                            .forEach(i -> column.values.get(i).append(number.charAt(i)));
                 });
         y++;
     }
 
     private static class Column {
         int colNumber;
-        List<String> values;
+        List<StringBuilder> values;
         String operator;
 
         public Column(int colNumber) {
