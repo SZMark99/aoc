@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DistanceSum {
-    private ListsDistence listsDistence = new ListsDistence();
+    private final ListsDistence listsDistence = new ListsDistence();
     private void sum(List<Integer> distances) {
         int sum = 0;
         for (int distance : distances) {
