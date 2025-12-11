@@ -23,7 +23,7 @@ public class Laboratories {
                 .sum();
         System.out.println("Total weight of paths: " + totalWeight);
 
-        System.out.println("Total split cells: " + num);
+        System.out.println("Total split lines: " + num);
     }
 
     private static Row getSeparateRows(String line) {
