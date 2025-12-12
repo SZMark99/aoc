@@ -2,11 +2,10 @@ package day8;
 
 import java.util.*;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Playground {
-     List<Set<Point>> connectedPoints = new ArrayList<>();
-     List<Point> points = new ArrayList<>();
+    List<Set<Point>> connectedPoints = new ArrayList<>();
+    List<Point> points = new ArrayList<>();
 
     public void read(String text) {
         Arrays.stream(text.split("\n"))
@@ -20,9 +19,12 @@ public class Playground {
         List<PointDistance> distances = createDistances();
         distances.sort(Comparator.comparingDouble(a -> a.distance));
 
-        IntStream.rangeClosed(0, 999)
+        IntStream.rangeClosed(0, distances.size() - 1)
                 .forEach(i -> {
                     PointDistance pointDistance = distances.get(i);
+                    if (connectedPoints.size() == 1 && connectedPoints.get(0).size() == points.size()) {
+                        return;
+                    }
                     boolean point1Connected = connectedPoints.stream()
                             .anyMatch(p -> p.contains(pointDistance.point1));
                     boolean point2Connected = connectedPoints.stream()
@@ -33,32 +35,26 @@ public class Playground {
                         newConnection.add(pointDistance.point1);
                         newConnection.add(pointDistance.point2);
                         connectedPoints.add(newConnection);
-                    }
-                    if (point1Connected && point2Connected) {
+                    } else if (point1Connected && point2Connected) {
                         connectedPoints.stream()
                                 .filter(p -> p.contains(pointDistance.point1))
                                 .forEach(p -> p.addAll(connectedPoints.stream()
                                         .filter(p1 -> p1.contains(pointDistance.point2)).findFirst().orElse(new HashSet<>())));
                         connectedPoints.removeIf(p -> p.contains(pointDistance.point2) && !p.contains(pointDistance.point1));
-                        return;
-                    }
-                    if (point1Connected) {
+                    } else if (point1Connected) {
                         connectedPoints.stream()
                                 .filter(p -> p.contains(pointDistance.point1))
                                 .forEach(p -> p.add(pointDistance.point2));
-                        return;
+                    } else {
+                        connectedPoints.stream()
+                                .filter(p -> p.contains(pointDistance.point2))
+                                .forEach(p -> p.add(pointDistance.point1));
                     }
-                    connectedPoints.stream()
-                            .filter(p -> p.contains(pointDistance.point2))
-                            .forEach(p -> p.add(pointDistance.point1));
+
+                    if (connectedPoints.size() == 1 && connectedPoints.get(0).size() == points.size()) {
+                        System.out.println("Closest connection to wall: " + pointDistance.point1.x * pointDistance.point2.x);
+                    }
                 });
-        List<Integer> sorted = connectedPoints.stream().map(Set::size).sorted(Comparator.reverseOrder()).toList();
-
-        System.out.println(sorted.get(0) * sorted.get(1) * sorted.get(2));
-    }
-
-    private void addNewConnectionIfNeeded() {
-
     }
 
     private List<PointDistance> createDistances() {
